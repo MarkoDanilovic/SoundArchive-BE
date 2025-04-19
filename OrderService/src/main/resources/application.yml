@@ -1,0 +1,27 @@
+server:
+  port: 8083
+
+spring:
+
+  application:
+    name: order-service
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/soundArchive
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: naming-server
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: naming-server  # Use the Docker service name
+    prefer-ip-address: true  # Use IP address for distributed registration
+    non-secure-port-enabled: false
+  client:
+    register-with-eureka: false  # Disable self-registration for Eureka server
+    fetch-registry: false  # Disable fetching registry for Eureka server
+    service-url:
+      defaultZone: http://naming-server:8761/eureka  # Internal Docker network URL

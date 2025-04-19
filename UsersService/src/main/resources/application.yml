@@ -1,0 +1,44 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: users-service
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: password
+
+services:
+  artistServiceUrl: http://localhost:8082/api/soundArchive/artist
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: "your-256-bit-secret-key-string-that-is-long-enough"
+  expiration: 86400000
+
+conf:
+  pagination:
+    default-page: 1
+    default-size: 10
