@@ -33,6 +33,9 @@ public class ArtistEntity {
     @Column(name = "country")
     private String country;
 
+    @Column(name = "picture")
+    private String picture;
+
     @OneToMany(mappedBy = "artist")
     private List<TrackEntity> tracks;
 }

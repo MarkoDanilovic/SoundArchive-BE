@@ -22,8 +22,6 @@ public class ArtistDTO {
 
     private String country;
 
-    private String picture;
-
     @Override
     public String toString() {
         Gson gson = new Gson();

@@ -64,11 +64,12 @@ public class TrackController {
                                                   @RequestParam (required = false, name = "name") String name,
                                                   @RequestParam (required = false, name = "genreId") Integer genreId,
                                                   @RequestParam (required = false, name = "mediumId") Integer mediumId,
-                                                  @RequestParam (required = false, name = "artist") String artist) {
+                                                  @RequestParam (required = false, name = "artistName") String artistName,
+                                                  @RequestParam (required = false, name = "artistId") Integer artistId) {
 
         Pageable pageable = PageableHelper.createPageable(page, size, sortBy, order, defaultPage, defaultSize);
 
-        ListPagedResultDTO<TrackDTO> trackList = trackService.findAll(pageable, name, genreId, mediumId, artist);
+        ListPagedResultDTO<TrackDTO> trackList = trackService.findAll(pageable, name, genreId, mediumId, artistName, artistId);
 
         int totalPages =(int) Math.ceil((double) trackList.getTotal() / pageable.getPageSize());
         if (totalPages == 0) {

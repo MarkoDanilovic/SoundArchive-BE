@@ -25,3 +25,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka
   instance:
     prefer-ip-address: true
+
+services:
+  recordBaseUrl: http://track-service:8082/api/soundArchive/record
+  trackBaseUrl: http://track-service:8082/api/soundArchive/track

@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/TrackService/uploads/artists/*
+/TrackService/uploads/tracks/*

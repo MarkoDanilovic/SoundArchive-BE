@@ -5,24 +5,27 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Setter
-public class ArtistDTO {
+public class TrackDTO {
 
     private Integer id;
 
-    private String firstName;
+    private String name;
 
-    private String lastName;
+    private Timestamp publishDate;
 
-    private String artistName;
-
-    private Timestamp birthday;
-
-    private String country;
+    private Double duration;
 
     private String picture;
+
+    private GenreDTO genre;
+
+    private ArtistDTO artist;
+
+    private List<RecordDTO> records;
 
     @Override
     public String toString() {

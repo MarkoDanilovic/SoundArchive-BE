@@ -15,10 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @Validated
@@ -56,11 +55,11 @@ public class UserController {
                                                             @RequestParam (required = false, name = "sortBy") String sortBy,
                                                             @RequestParam (required = false, name = "firstName") String firstName,
                                                             @RequestParam (required = false, name = "lastName") String lastName,
-                                                            @RequestParam (required = false, name = "displayName") String displayName) {
+                                                            @RequestParam (required = false, name = "username") String username) {
 
         Pageable pageable = PageableHelper.createPageable(page, size, sortBy, order, defaultPage, defaultSize);
 
-        ListPagedResultDTO<UserDTO> userList = userService.findAll(pageable, firstName, lastName, displayName);
+        ListPagedResultDTO<UserDTO> userList = userService.findAll(pageable, firstName, lastName, username);
 
         int totalPages =(int) Math.ceil((double) userList.getTotal() / pageable.getPageSize());
         if (totalPages == 0) {
@@ -94,6 +93,61 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
 
         userService.delete(id);
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/giveArtistPermission")
+    public ResponseEntity<Void> giveArtistPermission(Authentication authentication) {
+
+        String username = authentication.getName();
+        Integer permissionLevel = 2;
+
+        userService.changeUserPermission(username, permissionLevel);
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/revokeArtistPermission")
+    public ResponseEntity<Void> revokeArtistPermission(Authentication authentication) {
+
+        String username = authentication.getName();
+        Integer permissionLevel = 1;
+
+        userService.changeUserPermission(username, permissionLevel);
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/updateUserArtist/userId/{userId}/artistId/{artistId}")
+    public ResponseEntity<UserDTO> updateUserArtist(@PathVariable("userId") Integer userId, @PathVariable("artistId") Integer artistId) {
+
+        System.out.println("Method updateUserArtist is called");
+        UserDTO userDTO = userService.updateUserArtist(userId, artistId);
+        System.out.println("Method updateUserArtist is succesfully called");
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+
+    @PutMapping(value = "/giveAdminPermission")
+    public ResponseEntity<Void> giveAdminPermission(Authentication authentication) {
+
+        String username = authentication.getName();
+        Integer permissionLevel = 3;
+
+        userService.changeUserPermission(username, permissionLevel);
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/revokeAdminPermission")
+    public ResponseEntity<Void> revokeAdminPermission(Authentication authentication) {
+
+        String username = authentication.getName();
+        Integer permissionLevel = 1;
+
+        userService.changeUserPermission(username, permissionLevel);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

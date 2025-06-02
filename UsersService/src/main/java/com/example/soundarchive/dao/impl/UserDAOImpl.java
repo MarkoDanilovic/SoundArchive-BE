@@ -42,7 +42,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public ListPagedResultDTO<UserEntity> findAll(Pageable pageable, String firstName, String lastName, String displayName) {
+    public ListPagedResultDTO<UserEntity> findAll(Pageable pageable, String firstName, String lastName, String username) {
 
         int total;
         List<UserEntity> userEntities;
@@ -56,8 +56,8 @@ public class UserDAOImpl implements UserDAO {
             if (lastName != null) {
                 countQueryStr.append(" AND lower(a.lastName) LIKE lower(concat('%', :lastName, '%'))");
             }
-            if (displayName != null) {
-                countQueryStr.append(" AND lower(a.displayName) LIKE lower(concat('%', :displayName, '%'))");
+            if (username != null) {
+                countQueryStr.append(" AND lower(a.username) LIKE lower(concat('%', :username, '%'))");
             }
 
             TypedQuery<Long> countQuery = entityManager.createQuery(countQueryStr.toString(), Long.class);
@@ -68,8 +68,8 @@ public class UserDAOImpl implements UserDAO {
             if (lastName != null) {
                 countQuery.setParameter("lastName", lastName);
             }
-            if (displayName != null) {
-                countQuery.setParameter("displayName", displayName);
+            if (username != null) {
+                countQuery.setParameter("username", username);
             }
 
             total = countQuery.getSingleResult().intValue();
@@ -83,14 +83,14 @@ public class UserDAOImpl implements UserDAO {
             if (lastName != null && !lastName.isEmpty()) {
                 queryStr.append(" AND lower(a.lastName) LIKE lower(concat('%', :lastName, '%'))");
             }
-            if (displayName != null && !displayName.isEmpty()) {
-                queryStr.append(" AND lower(a.displayName) LIKE lower(concat('%', :displayName, '%'))");
+            if (username != null && !username.isEmpty()) {
+                queryStr.append(" AND lower(a.username) LIKE lower(concat('%', :username, '%'))");
             }
 
             if (pageable.getSort().isSorted()) {
                 for (Sort.Order order : pageable.getSort()) {
-                    if (!order.getProperty().equals("firstName") && !order.getProperty().equals("lastName") && !order.getProperty().equals("displayName")) {
-                        throw new InternalServerErrorException("Available sort value is only firstName, lastName or displayName. " +
+                    if (!order.getProperty().equals("firstName") && !order.getProperty().equals("lastName") && !order.getProperty().equals("username")) {
+                        throw new InternalServerErrorException("Available sort value is only firstName, lastName or username. " +
                                 "ArtistDAOImpl, findAll method.");
                     }
                     queryStr.append(" ORDER BY a.").append(order.getProperty()).append(" ").append(order.getDirection().name());
@@ -105,8 +105,8 @@ public class UserDAOImpl implements UserDAO {
             if (lastName != null) {
                 query.setParameter("lastName", lastName);
             }
-            if (displayName != null) {
-                query.setParameter("displayName", displayName);
+            if (username != null) {
+                query.setParameter("username", username);
             }
 
             query.setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize());
@@ -147,6 +147,8 @@ public class UserDAOImpl implements UserDAO {
         try {
             entityManager.merge(userEntity);
 
+            entityManager.flush();
+
         } catch (Exception e) {
             throw new InternalServerErrorException("Error in UserService, update " + e.getMessage());
         }
@@ -173,6 +175,83 @@ public class UserDAOImpl implements UserDAO {
             throw new DataNotFoundException(e.getMessage());
         }catch (Exception e) {
             throw new InternalServerErrorException("Error in UserService, delete " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    @Override
+    public void changePassword(String username, String encodedPassword) {
+
+        try {
+            TypedQuery<UserEntity> query = entityManager.createQuery("FROM UserEntity u WHERE u.username = :username", UserEntity.class);
+            query.setParameter("username", username);
+            UserEntity user = query.getSingleResult();
+
+            if (user == null) {
+                throw new DataNotFoundException("User not found");
+            }
+
+            user.setPassword(encodedPassword);
+
+            entityManager.merge(user);
+
+            entityManager.flush();
+
+        } catch (DataNotFoundException e){
+            throw new DataNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error in UserService, changePassword " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    @Override
+    public void changeUserPermission(String username, Integer permissionLevel) {
+
+        try {
+            TypedQuery<UserEntity> query = entityManager.createQuery("FROM UserEntity u WHERE u.username = :username", UserEntity.class);
+            query.setParameter("username", username);
+            UserEntity user = query.getSingleResult();
+
+
+            if (user == null) {
+                throw new DataNotFoundException("User not found");
+            }
+
+            user.setPermissionLevel(permissionLevel);
+
+            entityManager.merge(user);
+
+            entityManager.flush();
+
+        } catch (DataNotFoundException e){
+            throw new DataNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error in UserService, giveArtistPermission " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    @Override
+    public UserEntity updateUserArtist(Integer userId, Integer artistId) {
+
+        try {
+            UserEntity userEntity = entityManager.find(UserEntity.class, userId);
+
+            if(userEntity == null) throw new DataNotFoundException("User with id: " + userId + " not found.");
+
+            userEntity.setArtistId(artistId);
+
+            entityManager.merge(userEntity);
+
+            entityManager.flush();
+
+            return userEntity;
+
+        } catch (DataNotFoundException e){
+            throw new DataNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error in UserService, updateUserArtist " + e.getMessage());
         }
     }
 }

@@ -20,6 +20,8 @@ public class UpdateUserDTO {
     private String city;
     private String country;
 
+    private Boolean active;
+
     @Override
     public String toString() {
         Gson gson = new Gson();

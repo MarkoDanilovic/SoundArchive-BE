@@ -1,5 +1,6 @@
 package com.example.soundarchive.controller;
 
+import com.example.soundarchive.model.dto.AddCartItem;
 import com.example.soundarchive.model.dto.CartDTO;
 import com.example.soundarchive.model.dto.CreateCartDTO;
 import com.example.soundarchive.service.CartService;
@@ -33,7 +34,7 @@ public class CartController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CartDTO>> getCartByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<List<CartDTO>> getCartsByUserId(@PathVariable Integer userId) {
 
         List<CartDTO> cartDTOs = cartService.findByUserId(userId);
 
@@ -60,6 +61,39 @@ public class CartController {
     public ResponseEntity<Void> delete(@PathVariable String id) {
 
         cartService.delete(id);
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/unordered/user/{userId}")
+    public ResponseEntity<CartDTO> getUnorderedCart(@PathVariable Integer userId) {
+
+        CartDTO cartDTO = cartService.getUnorderedCartByUserId(userId);
+
+        return new ResponseEntity<>(cartDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/addToCart")
+    public ResponseEntity<CartDTO> addToCart(@RequestBody AddCartItem addCartItem) {
+
+        CartDTO cartDTO = cartService.addToCart(addCartItem);
+
+        return new ResponseEntity<>(cartDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/removeFromCart")
+    public ResponseEntity<CartDTO> removeFromCart(@RequestBody AddCartItem addCartItem) {
+
+        CartDTO cartDTO = cartService.removeFromCart(addCartItem);
+
+        return new ResponseEntity<>(cartDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/changeStatus/{status}")
+    public ResponseEntity<Void> changeStatus(@PathVariable String id,@PathVariable String status) {
+
+        cartService.changeStatus(id, status);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

@@ -75,4 +75,11 @@ public class ArtistService {
 
         artistDAO.delete(id);
     }
+
+    public ArtistDTO updatePicture(Integer id, String relativePath) {
+
+        ArtistEntity artistEntity = artistDAO.updatePicture(id, relativePath);
+
+        return mapper.map(artistEntity, ArtistDTO.class);
+    }
 }

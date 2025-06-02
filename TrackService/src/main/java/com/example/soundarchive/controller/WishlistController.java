@@ -88,4 +88,13 @@ public class WishlistController {
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
+
+    @GetMapping(value = "/user/{userId}/track/{trackId}")
+    public ResponseEntity<Boolean> checkWishlist(@PathVariable("userId") Integer userId,
+                                       @PathVariable("trackId") Integer trackId) {
+
+        Boolean result = wishlistService.checkWishlist(userId, trackId);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

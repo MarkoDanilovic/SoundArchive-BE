@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,5 +28,12 @@ public class UpdateTrackEntity {
 
     @Column(name = "picture")
     private String picture;
+
+    @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecordEntity> records;
+
+    @ManyToOne
+    @JoinColumn(name="genre_id", nullable=false)
+    private GenreEntity genre;
 
 }

@@ -1,9 +1,7 @@
 package com.example.soundarchive.mapper;
 
-import com.example.soundarchive.model.dto.ArtistDTO;
-import com.example.soundarchive.model.dto.GenreDTO;
-import com.example.soundarchive.model.dto.RecordDTO;
-import com.example.soundarchive.model.dto.TrackDTO;
+import com.example.soundarchive.model.RecordId;
+import com.example.soundarchive.model.dto.*;
 import com.example.soundarchive.model.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,7 +24,18 @@ public class TrackMapper {
 
     public TrackDTO mapDTO(TrackEntity trackEntity) {//, List<MediumEntity> mediumEntities) {
 
-        TrackDTO trackDTO = mapper.map(trackEntity, TrackDTO.class);
+        //TrackDTO trackDTO = mapper.map(trackEntity, TrackDTO.class);
+        TrackDTO trackDTO = new TrackDTO();
+        trackDTO.setId(trackEntity.getId());
+        trackDTO.setName(trackEntity.getName());
+        trackDTO.setPublishDate(trackEntity.getPublishDate());
+        trackDTO.setDuration(trackEntity.getDuration());
+        if(trackDTO.getPicture() != null && !trackDTO.getPicture().isEmpty()) {
+            trackDTO.setPicture(trackDTO.getPicture());
+        }
+        else {
+            trackDTO.setPicture("");
+        }
 
         ArtistDTO artistDTO = mapper.map(trackEntity.getArtist(), ArtistDTO.class);
         trackDTO.setArtist(artistDTO);
@@ -43,7 +52,20 @@ public class TrackMapper {
 
     public TrackEntity mapEntity(TrackDTO trackDTO) {
 
-        TrackEntity trackEntity = mapper.map(trackDTO, TrackEntity.class);
+        //TrackEntity trackEntity = mapper.map(trackDTO, TrackEntity.class);
+        TrackEntity trackEntity = new TrackEntity();
+        if(trackDTO.getId() != null && !trackDTO.getId().equals(0)) {
+            trackEntity.setId(trackDTO.getId());
+        }
+        trackEntity.setName(trackDTO.getName());
+        trackEntity.setPublishDate(trackDTO.getPublishDate());
+        trackEntity.setDuration(trackDTO.getDuration());
+        if(trackDTO.getPicture() != null && !trackDTO.getPicture().isEmpty()) {
+            trackEntity.setPicture(trackDTO.getPicture());
+        } else {
+            trackEntity.setPicture("");
+        }
+
         trackEntity.setArtist(mapper.map(trackDTO.getArtist(), ArtistEntity.class));
         trackEntity.setGenre(mapper.map(trackDTO.getGenre(), GenreEntity.class));
         trackEntity.setRecords(recordMapper.mapEntities(trackDTO.getRecords(), trackDTO.getId()));
@@ -85,4 +107,38 @@ public class TrackMapper {
 
     //JPA/Hibernate Fundamentals 2023 - Lesson 7 - Many-to-many relationships
     //stigao do 30. min
+
+
+    public void mapUpdate(TrackEntity trackEntity, UpdateTrackDTO updateTrackDTO) {
+
+        trackEntity.setName(updateTrackDTO.getName());
+        trackEntity.setPublishDate(updateTrackDTO.getPublishDate());
+        trackEntity.setDuration(updateTrackDTO.getDuration());
+        if(updateTrackDTO.getPicture() != null && !updateTrackDTO.getPicture().isEmpty()) {
+            trackEntity.setPicture(updateTrackDTO.getPicture());
+        }
+        trackEntity.setGenre(mapper.map(updateTrackDTO.getGenre(), GenreEntity.class));
+
+        trackEntity.getRecords().clear();
+        if(updateTrackDTO.getRecords() != null) {
+            for (RecordDTO recordDTO : updateTrackDTO.getRecords()) {
+                RecordEntity recordEntity = new RecordEntity();
+
+                RecordId recordId = new RecordId();
+                recordId.setTrackId(trackEntity.getId());
+                recordId.setMediumId(recordDTO.getMedium().getId());
+                recordEntity.setRecordId(recordId);
+
+                recordEntity.setTrack(trackEntity);
+
+                MediumEntity mediumEntity = mapper.map(recordDTO.getMedium(), MediumEntity.class);
+                recordEntity.setMedium(mediumEntity);
+
+                recordEntity.setQuantity(recordDTO.getQuantity());
+                recordEntity.setPrice(recordDTO.getPrice());
+
+                trackEntity.getRecords().add(recordEntity);
+            }
+        }
+    }
 }

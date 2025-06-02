@@ -158,4 +158,21 @@ public class WishlistDAOImpl implements WishlistDAO {
             throw new InternalServerErrorException("Error in WishlistDAOImpl, method delete. " + e.getMessage());
         }
     }
+
+    @Override
+    public Boolean checkWishlist(Integer userId, Integer trackId) {
+
+        WishlistId wishlistId = new WishlistId(userId, trackId);
+
+        try {
+            WishlistEntity wishlistEntity = entityManager.find(WishlistEntity.class, wishlistId);
+
+            if (wishlistEntity == null) return false;
+
+            return true;
+
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error in WishlistDAOImpl, method checkWishlist. " + e.getMessage());
+        }
+    }
 }

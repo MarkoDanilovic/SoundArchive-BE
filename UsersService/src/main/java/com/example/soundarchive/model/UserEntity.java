@@ -25,7 +25,7 @@ public class UserEntity {
     private String lastName;
     @Column(name = "dateOfBirth")
     private String dateOfBirth;
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
     @Column(name = "displayName")
     private String displayName;
@@ -44,12 +44,15 @@ public class UserEntity {
     @Column(name = "creditCardNumber")
     private String creditCardNumber;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     private String username;
     @Column(name = "password")
     private String password;
     @Column(name = "permissionLevel")
     private Integer permissionLevel;
+
+    @Column(name = "active")
+    private Boolean active;
 
     @Column(name = "artistId")
     private Integer artistId;

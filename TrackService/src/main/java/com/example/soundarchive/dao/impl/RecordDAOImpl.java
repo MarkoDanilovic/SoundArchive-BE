@@ -3,14 +3,17 @@ package com.example.soundarchive.dao.impl;
 import com.example.soundarchive.dao.RecordDAO;
 import com.example.soundarchive.exception.DataNotFoundException;
 import com.example.soundarchive.exception.InternalServerErrorException;
+import com.example.soundarchive.model.dto.QuantityDTO;
 import com.example.soundarchive.model.entity.RecordEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class RecordDAOImpl implements RecordDAO {
@@ -109,6 +112,43 @@ public class RecordDAOImpl implements RecordDAO {
             throw new DataNotFoundException(e.getMessage());
         } catch (Exception e) {
             throw new InternalServerErrorException("Greska " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    @Override
+    public void updateQuantity(QuantityDTO quantityDTO) {
+
+        try {
+            TypedQuery<RecordEntity> query = entityManager.createQuery("FROM RecordEntity r WHERE r.recordId.trackId = :trackId AND r.medium.id = :mediumId", RecordEntity.class);
+            query.setParameter("trackId", quantityDTO.getTrackId());
+            query.setParameter("mediumId", quantityDTO.getMediumId());
+            RecordEntity recordEntity = query.getSingleResult();
+
+            if (recordEntity == null) {
+                throw new DataNotFoundException("Record with trackId: " + quantityDTO.getTrackId() + " and mediumId: " + quantityDTO.getMediumId() + " not found.");
+            }
+
+            if(Objects.equals(quantityDTO.getAction(), "add")) {
+                recordEntity.setQuantity(recordEntity.getQuantity() + quantityDTO.getQuantity());
+            } else if (Objects.equals(quantityDTO.getAction(), "remove")) {
+                if((recordEntity.getQuantity() - quantityDTO.getQuantity()) >= 0) {
+                    recordEntity.setQuantity(recordEntity.getQuantity() - quantityDTO.getQuantity());
+                } else {
+                    recordEntity.setQuantity(0);
+                }
+            } else {
+                throw new BadRequestException("Error while calling updateQuantity, action must be either add or remove!");
+            }
+
+            entityManager.merge(recordEntity);
+
+        } catch (BadRequestException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (DataNotFoundException e) {
+            throw new DataNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error while calling updateQuantity! " + e.getMessage());
         }
     }
 }

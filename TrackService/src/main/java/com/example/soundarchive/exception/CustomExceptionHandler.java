@@ -118,4 +118,13 @@ public class CustomExceptionHandler {
 //    loggingService.logExceptionMessage(ErrorType.duplicatedDataErrorType,
 //            e.getMessage(), ExceptionUtils.getStackTrace(e),
 //            HttpStatus.INTERNAL_SERVER_ERROR.toString(), request);
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    public ResponseEntity<Error> handleIllegalArgumentException(HttpServletRequest request, IllegalArgumentException e) {
+
+        Error error = new Error(ErrorType.validationErrorType, e.getMessage());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 }

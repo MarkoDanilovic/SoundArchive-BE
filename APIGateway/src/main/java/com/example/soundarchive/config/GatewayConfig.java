@@ -16,8 +16,10 @@ public class GatewayConfig {
                 .route("TRACK-SERVICE", r -> r.path("/api/soundArchive/track/**",
                                 "/api/soundArchive/artist/**", "/api/soundArchive/record/**",
                                 "/api/soundArchive/genre/**", "/api/soundArchive/medium/**",
-                                "/api/soundArchive/wishlist/**")
+                                "/api/soundArchive/wishlist/**", "/api/soundArchive/upload/**")
                         .uri("lb://TRACK-SERVICE")) // Service name registered in Eureka
+                .route("UPLOADS", r -> r.path("/uploads/**")
+                        .uri("lb://TRACK-SERVICE"))
                 .route("ORDER-SERVICE", r -> r.path("/api/soundArchive/cart/**")
                         .uri("lb://ORDER-SERVICE")) // Service name registered in Eureka
                 .build();

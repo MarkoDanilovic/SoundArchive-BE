@@ -1,6 +1,7 @@
 package com.example.soundarchive.controller;
 
 import com.example.soundarchive.dao.impl.AuthDAO;
+import com.example.soundarchive.exception.UnauthorizedAccessException;
 import com.example.soundarchive.mapper.UserMapper;
 import com.example.soundarchive.model.UserEntity;
 import com.example.soundarchive.model.dto.ChangePasswordDTO;
@@ -10,6 +11,7 @@ import com.example.soundarchive.model.dto.UserDTO;
 import com.example.soundarchive.service.UserService;
 import com.example.soundarchive.util.jwt.JwtUtil;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +53,7 @@ public class AuthController {
         String encodedPassword = bCryptPasswordEncoder.encode(registerDTO.getPassword1());
         userDTO.setPassword(encodedPassword);
         userDTO.setPermissionLevel(1);
+        userDTO.setActive(true);
         userDTO = userService.save(userDTO);
 
         return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
@@ -61,16 +64,24 @@ public class AuthController {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
         String token = jwtUtil.generateToken(authentication.getName());
+
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
 
     @PutMapping("/changePassword")
-    public ResponseEntity<UserDTO> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
 
-        if(!changePasswordDTO.getOldPassword1().equals(changePasswordDTO.getOldPassword2())) throw new IllegalArgumentException("Old password one and two don't match! ");
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(changePasswordDTO.getUsername(), changePasswordDTO.getOldPassword()));
 
-        //some logic
+        if(!authentication.isAuthenticated()) throw new UnauthorizedAccessException("Username or old password is incorrect! ");
+
+        if(!changePasswordDTO.getNewPassword1().equals(changePasswordDTO.getNewPassword2())) throw new IllegalArgumentException("New password one and two don't match! ");
+
+        String encodedPassword = bCryptPasswordEncoder.encode(changePasswordDTO.getNewPassword1());
+
+        userService.changePassword(changePasswordDTO.getUsername(), encodedPassword);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

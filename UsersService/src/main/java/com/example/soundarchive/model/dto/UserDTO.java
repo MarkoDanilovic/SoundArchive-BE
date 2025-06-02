@@ -26,6 +26,8 @@ public class UserDTO {
     private String password;
     private Integer permissionLevel;
 
+    private Boolean active;
+
     private Integer artistId;
 
     @Override

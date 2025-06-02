@@ -1,6 +1,7 @@
 package com.example.soundarchive.service;
 
 import com.example.soundarchive.dao.impl.AuthDAO;
+import com.example.soundarchive.exception.UnauthorizedAccessException;
 import com.example.soundarchive.model.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.User;
@@ -25,6 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 //        if(fan == null && artist == null) {
 //            throw new UsernameNotFoundException(username + "not found.");
 //        }
+        if(!user.getActive()) throw new UnauthorizedAccessException("User " + username + " has been banned!");
 
         UserDetails userDetails = User.builder().username(user.getUsername()).password(user.getPassword()).roles("USER").build();
 

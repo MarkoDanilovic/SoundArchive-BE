@@ -16,4 +16,6 @@ public interface WishlistDAO {
     void delete(WishlistId wishlistId);
 
     void deleteByUserId(Integer userId);
+
+    Boolean checkWishlist(Integer userId, Integer trackId);
 }

@@ -2,7 +2,6 @@ package com.example.soundarchive.dao;
 
 import com.example.soundarchive.model.dto.pagination.ListPagedResultDTO;
 import com.example.soundarchive.model.entity.TrackEntity;
-import com.example.soundarchive.model.entity.UpdateTrackEntity;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -13,11 +12,13 @@ public interface TrackDAO {
 
     public List<TrackEntity> findByName(String name);
 
-    public ListPagedResultDTO<TrackEntity> findAll(Pageable pageable, String name, Integer genreId, Integer mediumId, String artist);
+    public ListPagedResultDTO<TrackEntity> findAll(Pageable pageable, String name, Integer genreId, Integer mediumId, String artistName, Integer artistId);
 
     public TrackEntity save(TrackEntity trackEntity);
 
-    public TrackEntity update(UpdateTrackEntity updateTrackEntity);
+    public TrackEntity update(TrackEntity updateTrackEntity);
 
-    public void delete(Integer id);
+    public void delete(TrackEntity id);
+
+    TrackEntity updatePicture(Integer id, String relativePath);
 }

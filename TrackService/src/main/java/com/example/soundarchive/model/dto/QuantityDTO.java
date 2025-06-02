@@ -4,25 +4,17 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
-
 @Getter
 @Setter
-public class ArtistDTO {
+public class QuantityDTO {
 
-    private Integer id;
+    private Integer trackId;
 
-    private String firstName;
+    private Integer mediumId;
 
-    private String lastName;
+    private Integer quantity;
 
-    private String artistName;
-
-    private Timestamp birthday;
-
-    private String country;
-
-    private String picture;
+    private String action;
 
     @Override
     public String toString() {

@@ -5,7 +5,6 @@ import com.example.soundarchive.exception.DataNotFoundException;
 import com.example.soundarchive.exception.InternalServerErrorException;
 import com.example.soundarchive.model.dto.pagination.ListPagedResultDTO;
 import com.example.soundarchive.model.entity.TrackEntity;
-import com.example.soundarchive.model.entity.UpdateTrackEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -37,7 +35,7 @@ public class TrackDAOImpl implements TrackDAO {
         } catch(DataNotFoundException e) {
             throw new DataNotFoundException(e.getMessage());
         } catch (Exception e) {
-            throw new InternalServerErrorException("Greska " + e.getMessage());
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method findById. " + e.getMessage());
         }
 
         return trackEntity;
@@ -61,14 +59,14 @@ public class TrackDAOImpl implements TrackDAO {
             trackEntities = query.getResultList();
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Greska " + e.getMessage());
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method findByName. " + e.getMessage());
         }
 
         return trackEntities;
     }
 
     @Override
-    public ListPagedResultDTO<TrackEntity> findAll(Pageable pageable, String name, Integer genreId, Integer mediumId, String artist) {
+    public ListPagedResultDTO<TrackEntity> findAll(Pageable pageable, String name, Integer genreId, Integer mediumId, String artistName, Integer artistId) {
 
         int total;
         List<TrackEntity> trackEntities;
@@ -79,7 +77,7 @@ public class TrackDAOImpl implements TrackDAO {
             if (genreId != null) {
                 countQueryStr.append(" INNER JOIN t.genre g");
             }
-            if (artist != null && !artist.isEmpty()) {
+            if ((artistName != null && !artistName.isEmpty()) || artistId != null) {
                 countQueryStr.append(" INNER JOIN t.artist a");
             }
             if (mediumId != null) {
@@ -94,19 +92,23 @@ public class TrackDAOImpl implements TrackDAO {
             if (name != null && !name.isEmpty()) {
                 countQueryStr.append(" AND lower(t.name) LIKE lower(concat('%', :name, '%'))");
             }
-            if (artist != null && !artist.isEmpty()) {
-                countQueryStr.append(" AND lower(a.artistName) LIKE lower(concat('%', :artist, '%'))");
+            if (artistName != null && !artistName.isEmpty()) {
+                countQueryStr.append(" AND lower(a.artistName) LIKE lower(concat('%', :artistName, '%'))");
             }
             if (mediumId != null) {
                 countQueryStr.append(" AND m.id = :mediumId");
+            }
+            if (artistId != null) {
+                countQueryStr.append(" AND a.id = :artistId");
             }
 
             TypedQuery<Long> countQuery = entityManager.createQuery(countQueryStr.toString(), Long.class);
 
             if (name != null && !name.isEmpty()) countQuery.setParameter("name", name);
             if (genreId != null) countQuery.setParameter("genreId", genreId);
-            if (artist != null && !artist.isEmpty()) countQuery.setParameter("artist", artist);
+            if (artistName != null && !artistName.isEmpty()) countQuery.setParameter("artistName", artistName);
             if (mediumId != null) countQuery.setParameter("mediumId", mediumId);
+            if (artistId != null) countQuery.setParameter("artistId", artistId);
 
             total = countQuery.getSingleResult().intValue();
 
@@ -117,7 +119,7 @@ public class TrackDAOImpl implements TrackDAO {
             if (genreId != null) {
                 queryStr.append(" INNER JOIN t.genre g");
             }
-            if (artist != null && !artist.isEmpty()) {
+            if ((artistName != null && !artistName.isEmpty()) || artistId != null) {
                 queryStr.append(" INNER JOIN t.artist a");
             }
             if (mediumId != null) {
@@ -132,11 +134,14 @@ public class TrackDAOImpl implements TrackDAO {
             if (name != null && !name.isEmpty()) {
                 queryStr.append(" AND lower(t.name) LIKE lower(concat('%', :name, '%'))");
             }
-            if (artist != null && !artist.isEmpty()) {
-                queryStr.append(" AND lower(a.artistName) LIKE lower(concat('%', :artist, '%'))");
+            if (artistName != null && !artistName.isEmpty()) {
+                queryStr.append(" AND lower(a.artistName) LIKE lower(concat('%', :artistName, '%'))");
             }
             if (mediumId != null) {
                 queryStr.append(" AND m.id = :mediumId");
+            }
+            if (artistId != null) {
+                queryStr.append(" AND a.id = :artistId");
             }
 
             if (pageable.getSort().isSorted()) {
@@ -153,8 +158,9 @@ public class TrackDAOImpl implements TrackDAO {
 
             if (name != null && !name.isEmpty()) query.setParameter("name", name);
             if (genreId != null) query.setParameter("genreId", genreId);
-            if (artist != null && !artist.isEmpty()) query.setParameter("artist", artist);
+            if (artistName != null && !artistName.isEmpty()) query.setParameter("artistName", artistName);
             if (mediumId != null) query.setParameter("mediumId", mediumId);
+            if (artistId != null) query.setParameter("artistId", artistId);
 
             query.setFirstResult((pageable.getPageNumber() - 1) * pageable.getPageSize());
             query.setMaxResults(pageable.getPageSize());
@@ -166,7 +172,7 @@ public class TrackDAOImpl implements TrackDAO {
         } catch (DataNotFoundException e) {
             throw new DataNotFoundException(e.getMessage());
         } catch (Exception e) {
-            throw new InternalServerErrorException("Greska " + e.getMessage());
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method findAll. " + e.getMessage());
         }
 
         return new ListPagedResultDTO<>(total, trackEntities);
@@ -177,13 +183,15 @@ public class TrackDAOImpl implements TrackDAO {
     public TrackEntity save(TrackEntity trackEntity) {
 
         try {
-            trackEntity = entityManager.merge(trackEntity);
+            TrackEntity savedEntity = entityManager.merge(trackEntity);
+
+            entityManager.flush();
+
+            return savedEntity;
 
         } catch (Exception e) {
-            throw new InternalServerErrorException("Greska " + e.getMessage());
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method save. " + e.getMessage());
         }
-
-        return trackEntity;
     }
 
 //    @Transactional
@@ -209,41 +217,63 @@ public class TrackDAOImpl implements TrackDAO {
 
     @Transactional
     @Override
-    public TrackEntity update(UpdateTrackEntity updateTrackEntity) {
+    public TrackEntity update(TrackEntity trackEntity) {
 
         try {
-            entityManager.merge(updateTrackEntity);
+            entityManager.merge(trackEntity);
 
             entityManager.flush();
 
+            return entityManager.find(TrackEntity.class, trackEntity.getId());
+
         } catch (Exception e) {
-            throw new InternalServerErrorException("Greska " + e.getMessage());
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method update. " + e.getMessage());
         }
-
-        TrackEntity trackEntity = entityManager.find(TrackEntity.class, updateTrackEntity.getId());
-
-        return trackEntity;
     }
 
     @Transactional
     @Override
-    public void delete(Integer id) {
+    public void delete(TrackEntity trackEntity) {
 
         try {
-
-            TrackEntity trackEntity = entityManager.find(TrackEntity.class, id);
-
             if (trackEntity != null) {
                 entityManager.remove(trackEntity);
             }
             else {
-                throw new DataNotFoundException("Track with id: " + id + " not found.");
+                throw new DataNotFoundException("Track not found.");
             }
 
         } catch (DataNotFoundException e) {
             throw new DataNotFoundException(e.getMessage());
         } catch (Exception e) {
-            throw new InternalServerErrorException("Greska " + e.getMessage());
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method delete. " + e.getMessage());
         }
+    }
+
+    @Transactional
+    @Override
+    public TrackEntity updatePicture(Integer id, String relativePath) {
+
+        TrackEntity trackEntity;
+
+        try {
+
+            trackEntity = entityManager.find(TrackEntity.class, id);
+
+            if(trackEntity == null) throw new DataNotFoundException("Track with id: " + id + " not found.");
+
+            trackEntity.setPicture(relativePath);
+
+            entityManager.merge(trackEntity);
+
+            entityManager.flush();
+
+        } catch(DataNotFoundException e) {
+            throw new DataNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error in TrackDAOImpl, method updatePicture. " + e.getMessage());
+        }
+
+        return trackEntity;
     }
 }

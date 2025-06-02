@@ -4,6 +4,7 @@ import com.example.soundarchive.dao.impl.MediumDAOImpl;
 import com.example.soundarchive.dao.impl.RecordDAOImpl;
 import com.example.soundarchive.mapper.CreateRecordMapper;
 import com.example.soundarchive.model.dto.CreateRecordDTO;
+import com.example.soundarchive.model.dto.QuantityDTO;
 import com.example.soundarchive.model.entity.MediumEntity;
 import com.example.soundarchive.model.entity.RecordEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,5 +71,10 @@ public class RecordService {
     public void deleteByTrackId(Integer trackId) {
 
         recordDAO.deleteByTrackId(trackId);
+    }
+
+    public void updateQuantity(QuantityDTO quantityDTO) {
+
+        recordDAO.updateQuantity(quantityDTO);
     }
 }

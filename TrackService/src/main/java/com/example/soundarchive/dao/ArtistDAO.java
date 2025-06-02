@@ -19,4 +19,6 @@ public interface ArtistDAO {
     public ArtistEntity update(ArtistEntity trackEntity);
 
     public void delete(Integer id);
+
+    public ArtistEntity updatePicture(Integer id, String relativePath);
 }

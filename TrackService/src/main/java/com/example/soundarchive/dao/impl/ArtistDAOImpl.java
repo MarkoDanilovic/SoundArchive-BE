@@ -146,7 +146,15 @@ public class ArtistDAOImpl implements ArtistDAO {
     public ArtistEntity update(ArtistEntity artistEntity) {
 
         try {
+            if(artistEntity.getPicture() == null || artistEntity.getPicture().isEmpty()) {
+
+                ArtistEntity oldArtistEntity = entityManager.find(ArtistEntity.class, artistEntity.getId());
+                artistEntity.setPicture(oldArtistEntity.getPicture());
+            }
+
             entityManager.merge(artistEntity);
+
+            entityManager.flush();
 
         } catch (Exception e) {
             throw new InternalServerErrorException("Greska " + e.getMessage());
@@ -175,5 +183,32 @@ public class ArtistDAOImpl implements ArtistDAO {
         }catch (Exception e) {
             throw new InternalServerErrorException("Greska " + e.getMessage());
         }
+    }
+
+    @Transactional
+    @Override
+    public ArtistEntity updatePicture(Integer id, String relativePath) {
+
+        ArtistEntity artistEntity;
+
+        try {
+
+            artistEntity = entityManager.find(ArtistEntity.class, id);
+
+            if(artistEntity == null) throw new DataNotFoundException("Artist with id: " + id + " not found.");
+
+            artistEntity.setPicture(relativePath);
+
+            entityManager.merge(artistEntity);
+
+            entityManager.flush();
+
+        } catch(DataNotFoundException e) {
+            throw new DataNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error in ArtistDAOImpl, method updatePicture. " + e.getMessage());
+        }
+
+        return artistEntity;
     }
 }

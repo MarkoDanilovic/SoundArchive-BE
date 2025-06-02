@@ -11,15 +11,19 @@ import java.util.function.Consumer;
 @Component
 public class UserMapper {
 
-    public UserEntity mapUpdate(UserEntity userEntity, UpdateUserDTO updateUserDTO) {
+    public void mapUpdate(UserEntity userEntity, UpdateUserDTO updateUserDTO) {
         updateFieldIfNotNull(userEntity::setFirstName, updateUserDTO.getFirstName());
         updateFieldIfNotNull(userEntity::setLastName, updateUserDTO.getLastName());
         updateFieldIfNotNull(userEntity::setDateOfBirth, updateUserDTO.getDateOfBirth());
         updateFieldIfNotNull(userEntity::setEmail, updateUserDTO.getEmail());
         updateFieldIfNotNull(userEntity::setDisplayName, updateUserDTO.getDisplayName());
         updateFieldIfNotNull(userEntity::setSocialMediaLink, updateUserDTO.getSocialMediaLink());
+        updateFieldIfNotNull(userEntity::setPhoneNumber, updateUserDTO.getPhoneNumber());
+        updateFieldIfNotNull(userEntity::setAddress, updateUserDTO.getAddress());
+        updateFieldIfNotNull(userEntity::setCity, updateUserDTO.getCity());
+        updateFieldIfNotNull(userEntity::setCountry, updateUserDTO.getCountry());
+        updateFieldIfNotNull(userEntity::setActive, updateUserDTO.getActive());
 
-        return userEntity;
     }
 
     private <T> void updateFieldIfNotNull(Consumer<T> setter, T value) {

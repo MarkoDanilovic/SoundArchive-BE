@@ -60,4 +60,9 @@ public class WishlistService {
 
         wishlistDAO.deleteByUserId(userId);
     }
+
+    public Boolean checkWishlist(Integer userId, Integer trackId) {
+
+        return wishlistDAO.checkWishlist(userId, trackId);
+    }
 }

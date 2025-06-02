@@ -1,6 +1,7 @@
 package com.example.soundarchive.controller;
 
 import com.example.soundarchive.model.dto.CreateRecordDTO;
+import com.example.soundarchive.model.dto.QuantityDTO;
 import com.example.soundarchive.model.dto.RecordDTO;
 import com.example.soundarchive.service.RecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,14 @@ public class RecordController {
     public ResponseEntity<Void> deleteByTrackId(@PathVariable("trackId") Integer trackId) {
 
         recordService.deleteByTrackId(trackId);
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/updateQuantity")
+    public ResponseEntity<Void> updateQuantity(@RequestBody QuantityDTO quantityDTO) {
+
+        recordService.updateQuantity(quantityDTO);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

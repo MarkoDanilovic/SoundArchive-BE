@@ -30,7 +30,7 @@ public class TrackEntity {
     @Column(name = "picture")
     private String picture;
 
-    @OneToMany(mappedBy = "track", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecordEntity> records;
 
     @ManyToOne
